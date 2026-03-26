@@ -6,56 +6,56 @@ import { UpdateTaskDto } from './dto/updateTask.dto';
 
 @Injectable()
 export class TasksService {
-    private tasks: Task[] = [];
+  private tasks: Task[] = [];
 
-    getAllTasks(): Task[] {
-        return this.tasks;
+  getAllTasks(): Task[] {
+    return this.tasks;
+  }
+
+  createTask(createTaskDto: CreateTaskDto): Task {
+    const { title, description } = createTaskDto;
+
+    const task: Task = {
+      id: uuid(),
+      title,
+      description,
+      status: TaskStatus.OPEN,
+    };
+
+    this.tasks.push(task);
+
+    return task;
+  }
+
+  // 🔍 Buscar por ID
+  getTaskById(id: string): Task {
+    const task = this.tasks.find((t) => t.id === id);
+
+    if (!task) {
+      throw new NotFoundException(`Task with id ${id} not found`);
     }
 
-    createTask(createTaskDto: CreateTaskDto): Task {
-        const { title, description } = createTaskDto;
+    return task;
+  }
 
-        const task: Task = {
-            id: uuid(),
-            title,
-            description,
-            status: TaskStatus.OPEN
-        };
-        
-        this.tasks.push(task);
-
-        return task;
+  // ❌ Eliminar por ID
+  deleteTask(id: string): void {
+    const found = this.getTaskById(id); // reutilizamos lógica
+    if (!found) {
+      throw new NotFoundException(`Task with id ${id} not found`);
     }
+    this.tasks = this.tasks.filter((task) => task.id !== found.id);
+  }
 
-    // 🔍 Buscar por ID
-    getTaskById(id: string): Task {
-        const task = this.tasks.find(t => t.id === id);
+  updateTask(id: string, updateTaskDto: UpdateTaskDto): Task {
+    const task = this.getTaskById(id);
 
-        if (!task) {
-            throw new NotFoundException(`Task with id ${id} not found`);
-        }
+    const { title, description, status } = updateTaskDto;
 
-        return task;
-    }
+    if (title) task.title = title;
+    if (description) task.description = description;
+    if (status) task.status = status;
 
-    // ❌ Eliminar por ID
-    deleteTask(id: string): void {
-        const found = this.getTaskById(id); // reutilizamos lógica
-
-        this.tasks = this.tasks.filter(task => task.id !== found.id);
-    }
-
-    updateTask(id: string, updateTaskDto: UpdateTaskDto): Task {
-        const task = this.getTaskById(id);
-
-        const { title, description, status } = updateTaskDto;
-
-        if (title) task.title = title;
-        if (description) task.description = description;
-        if (status) task.status = status;
-
-        return task;
-    }
-
-    
+    return task;
+  }
 }
