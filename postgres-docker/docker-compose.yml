@@ -1,0 +1,14 @@
+services:
+  postgres:
+    build: .
+    container_name: postgres_nest
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ../.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
